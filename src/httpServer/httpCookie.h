@@ -11,47 +11,47 @@
 
 struct HTTPSERVER_EXPORT HttpCookie
 {
-    QString name;
-    QString value;
-    int ageSeconds;
-    QDateTime expiration;
-    QString domain;
-    QString path;
-    bool secure;
-    bool httpOnly;
+	QString name;
+	QString value;
+	int ageSeconds;
+	QDateTime expiration;
+	QString domain;
+	QString path;
+	bool secure;
+	bool httpOnly;
 
-    HttpCookie() {}
-    HttpCookie(QString name, QString value, int ageSeconds = -1, QDateTime expiration = QDateTime(), QString domain = "", QString path = "/", bool secure = false, bool httpOnly = false) :
-        name(name), value(value), ageSeconds(ageSeconds), expiration(expiration), domain(domain), path(path), secure(secure), httpOnly(httpOnly) {}
+	HttpCookie() {}
+	HttpCookie(QString name, QString value, int ageSeconds = -1, QDateTime expiration = QDateTime(), QString domain = "", QString path = "/", bool secure = false, bool httpOnly = false) :
+		name(name), value(value), ageSeconds(ageSeconds), expiration(expiration), domain(domain), path(path), secure(secure), httpOnly(httpOnly) {}
 
-    QByteArray toByteArray() const
-    {
-        QByteArray buf;
+	QByteArray toByteArray() const
+	{
+		QByteArray buf;
 
-        buf += name.toLatin1();
-        buf += '=';
-        buf += QUrl::toPercentEncoding(value);
+		buf += name.toLatin1();
+		buf += '=';
+		buf += QUrl::toPercentEncoding(value);
 
-        if (expiration.isValid())
-            buf += "; Expires=" + expiration.toString(Qt::RFC2822Date);
+		if (expiration.isValid())
+			buf += "; Expires=" + expiration.toString(Qt::RFC2822Date).toLatin1();
 
-        if (ageSeconds > 0)
-            buf += "; Max-Age=" + QString::number(ageSeconds);
+		if (ageSeconds > 0)
+			buf += "; Max-Age=" + QString::number(ageSeconds).toLatin1();
 
-        if (!domain.isEmpty())
-            buf += "; Domain=" + domain;
+		if (!domain.isEmpty())
+			buf += "; Domain=" + domain.toLatin1();
 
-        if (!path.isEmpty())
-            buf += "; Path=" + QUrl::toPercentEncoding(path);
+		if (!path.isEmpty())
+			buf += "; Path=" + QUrl::toPercentEncoding(path);
 
-        if (secure)
-            buf += "; Secure";
+		if (secure)
+			buf += "; Secure";
 
-        if (httpOnly)
-            buf += "; HttpOnly";
+		if (httpOnly)
+			buf += "; HttpOnly";
 
-        return buf;
-    }
+		return buf;
+	}
 };
 
 #endif // HTTP_COOKIE_H

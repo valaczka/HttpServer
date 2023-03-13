@@ -14,32 +14,34 @@
 // HTTP server is HTTP/1.1 compliant and is based on RFC7230 series. This specification was created in June 2014 and obsoletes RFC2616, RFC2145
 class HTTPSERVER_EXPORT HttpServer : public QTcpServer
 {
-    Q_OBJECT
+	Q_OBJECT
 
 private:
-    HttpServerConfig config;
-    HttpRequestHandler *requestHandler;
+	HttpServerConfig config;
+	HttpRequestHandler *requestHandler;
 
-    QSslConfiguration *sslConfig;
-    std::vector<HttpConnection *> connections;
+	QSslConfiguration *sslConfig;
+	std::vector<HttpConnection *> connections;
 
-    void loadSslConfig();
+	void loadSslConfig();
 
 public:
-    HttpServer(const HttpServerConfig &config, HttpRequestHandler *requestHandler, QObject *parent = nullptr);
-    ~HttpServer();
+	HttpServer(const HttpServerConfig &config, HttpRequestHandler *requestHandler, QObject *parent = nullptr);
+	~HttpServer();
 
-    bool listen();
-    void close();
+	bool listen();
+	void close();
+
+	QSslConfiguration *getSslConfig() const;
 
 protected:
-    void incomingConnection(qintptr socketDescriptor);
+	void incomingConnection(qintptr socketDescriptor);
 
 private slots:
-    void connectionDisconnected();
+	void connectionDisconnected();
 
 signals:
-    void handleConnection(int socketDescriptor);
+	void handleConnection(int socketDescriptor);
 
 };
 
