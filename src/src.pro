@@ -28,6 +28,7 @@ CONFIG += c++17 staticlib
 
 SOURCES += \
 		httpServer/httpConnection.cpp \
+		httpServer/httpEventStream.cpp \
 		httpServer/httpRequest.cpp \
 		httpServer/httpRequestRouter.cpp \
 		httpServer/httpResponse.cpp \
@@ -37,6 +38,7 @@ SOURCES += \
 HEADERS += \
 		httpServer/httpConnection.h \
 		httpServer/httpCookie.h \
+		httpServer/httpEventStream.h \
 		httpServer/httpRequest.h \
 		httpServer/httpRequestHandler.h \
 		httpServer/httpRequestRouter.h \

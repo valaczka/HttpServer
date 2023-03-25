@@ -16,6 +16,25 @@ HttpConnection::HttpConnection(HttpServerConfig *config, HttpRequestHandler *req
 	connect(timeoutTimer, &QTimer::timeout, this, &HttpConnection::timeout);
 }
 
+
+
+HttpEventStream *HttpConnection::eventStream() const
+{
+	return m_eventStream;
+}
+
+bool HttpConnection::setEventStream(HttpEventStream *newEventStream)
+{
+	if (m_eventStream) {
+		if (config->verbosity >= HttpServerConfig::Verbose::Critical)
+			qCritical() << QString("Event stream already exists");
+		return false;
+	}
+	m_eventStream = newEventStream;
+
+	return true;
+}
+
 void HttpConnection::createSocket(qintptr socketDescriptor)
 {
 	// If SSL is supported and configured, then create an instance of QSslSocket
@@ -157,9 +176,13 @@ void HttpConnection::bytesWritten(qint64 bytes)
 		if (!response->isSending())
 			break;
 
-		// If writeChunk returns false, means buffer is full
-		if (!response->writeChunk(socket))
-			break;
+		// If event stream is present, skip response writes
+		if (!m_eventStream) {
+
+			// If writeChunk returns false, means buffer is full
+			if (!response->writeChunk(socket))
+				break;
+		}
 
 		// Read connection header, default to keep-alive
 		QString connection;
@@ -183,7 +206,7 @@ void HttpConnection::bytesWritten(qint64 bytes)
 	}
 
 	// If we are done sending responses, close the connection or start keep-alive timer
-	if (pendingResponses.empty())
+	if (pendingResponses.empty() && !m_eventStream)
 	{
 		if (closeConnection)
 		{
@@ -195,10 +218,22 @@ void HttpConnection::bytesWritten(qint64 bytes)
 			timeoutTimer->start(config->keepAliveTimeout * 1000);
 		}
 	}
+
+	if (m_eventStream) {
+		keepAliveMode = true;
+
+		if (!m_eventStream->headerSent())
+			m_eventStream->sendHeader();
+
+		m_eventStream->writeChunk();
+	}
 }
 
 void HttpConnection::timeout()
 {
+	if (m_eventStream)
+		return;
+
 	// If we are in keep-alive mode (meaning this socket has already had one successful request) and there is no data that's been read,
 	// we just close the socket peacefully
 	if (keepAliveMode && (!currentRequest || currentRequest->state() != HttpRequest::State::ReadRequestLine))
@@ -320,6 +355,12 @@ HttpConnection::~HttpConnection()
 	for (auto timer : responseTimers)
 		delete timer.second;
 	responseTimers.clear();
+
+
+	if (m_eventStream) {
+		delete m_eventStream;
+		m_eventStream = nullptr;
+	}
 
 	// Delete pending responses
 	while (!pendingResponses.empty())
