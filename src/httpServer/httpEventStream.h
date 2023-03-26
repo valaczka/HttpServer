@@ -29,6 +29,7 @@
 
 #include <QObject>
 #include "qtcpsocket.h"
+#include "qtimer.h"
 #include "util.h"
 
 class HttpConnection;
@@ -53,6 +54,9 @@ public:
 	bool write(const QByteArray &event, const QByteArray &data);
 	bool writeChunk();
 
+public slots:
+	bool ping();
+
 signals:
 
 protected:
@@ -61,6 +65,7 @@ protected:
 	int m_writeIndex = -1;
 	QByteArray m_buffer;
 	bool m_headerSent = false;
+	QTimer m_pingTimer;
 
 };
 

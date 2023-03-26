@@ -38,6 +38,9 @@ HttpEventStream::HttpEventStream(HttpConnection *httpConnection)
 	m_socket = m_httpConnection->socket;
 
 	Q_ASSERT(m_socket);
+
+	connect(&m_pingTimer, &QTimer::timeout, this, &HttpEventStream::ping);
+	m_pingTimer.start(2*60*1000);
 }
 
 
@@ -47,7 +50,7 @@ HttpEventStream::HttpEventStream(HttpConnection *httpConnection)
 
 HttpEventStream::~HttpEventStream()
 {
-
+	m_pingTimer.stop();
 }
 
 
@@ -66,8 +69,24 @@ HttpConnection *HttpEventStream::httpConnection() const
 
 bool HttpEventStream::write(const QByteArray &event, const QByteArray &data)
 {
+	if (!m_headerSent)
+		sendHeader();
+
 	m_buffer += QByteArrayLiteral("event: ")+event+QByteArrayLiteral("\r\n");
 	m_buffer += QByteArrayLiteral("data: ")+data+QByteArrayLiteral("\r\n\r\n");
+
+	return writeChunk();
+}
+
+
+/**
+ * @brief HttpEventStream::ping
+ * @return
+ */
+
+bool HttpEventStream::ping()
+{
+	m_buffer += QByteArrayLiteral(": ping\r\n\r\n");
 
 	return writeChunk();
 }
@@ -85,6 +104,9 @@ bool HttpEventStream::writeChunk()
 		m_writeIndex = 0;
 		return true;
 	}
+
+	if (!m_socket)
+		return true;
 
 	int bytesWritten = m_socket->write(m_buffer.mid(m_writeIndex));
 	if (bytesWritten == -1)
