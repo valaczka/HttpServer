@@ -473,7 +473,7 @@ void HttpRequest::parseContentType()
 	}
 
 	// Attempt to match syntax for multipart/form-data content type (specifies a boundary instead of a charset)
-	QRegularExpression formDataRegex("^multipart/form-data;\\s*boundary=\"?(.*)\"?$");
+	QRegularExpression formDataRegex("^multipart/form-data;\\s*boundary=\"?([^\"]*)\"?$");
 	auto match = formDataRegex.match(contentType);
 	if (match.hasMatch())
 	{
@@ -633,13 +633,13 @@ std::unordered_map<QString, FormFile> HttpRequest::formFiles() const
 	return formFiles_;
 }
 
-QString HttpRequest::formFile(QString key) const
+QString HttpRequest::formField(QString key) const
 {
 	auto it = formFields_.find(key);
 	return it != formFields_.end() ? it->second : "";
 }
 
-FormFile HttpRequest::formField(QString key) const
+FormFile HttpRequest::formFile(QString key) const
 {
 	auto it = formFiles_.find(key);
 	return it != formFiles_.end() ? it->second : FormFile();

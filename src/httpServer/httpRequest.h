@@ -27,114 +27,114 @@
 
 struct HTTPSERVER_EXPORT FormFile
 {
-    QTemporaryFile *file;
-    QString filename;
+	QTemporaryFile *file;
+	QString filename;
 };
 
 struct TemporaryFormData
 {
-    QString name;
-    QString filename;
-    QTemporaryFile *file = nullptr;
+	QString name;
+	QString filename;
+	QTemporaryFile *file = nullptr;
 };
 
 class HTTPSERVER_EXPORT HttpRequest
 {
-    friend class HttpResponse;
+	friend class HttpResponse;
 
 public:
-    enum class State
-    {
-        ReadRequestLine,
-        ReadHeader,
-        ReadBody,
-        ReadMultiFormBodyData,
-        ReadMultiFormBodyHeaders,
-        Complete,
-        Abort
-    };
+	enum class State
+	{
+		ReadRequestLine,
+		ReadHeader,
+		ReadBody,
+		ReadMultiFormBodyData,
+		ReadMultiFormBodyHeaders,
+		Complete,
+		Abort
+	};
 
 private:
-    const std::vector<QString> allowedMethods = {"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"};
+	const std::vector<QString> allowedMethods = {"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"};
 
-    HttpServerConfig *config;
+	HttpServerConfig *config;
 
-    QByteArray buffer;
-    int requestBytesSize;
+	QByteArray buffer;
+	int requestBytesSize;
 
-    State state_;
-    QHostAddress address_;
-    QString method_;
-    QUrl uri_;
-    QUrlQuery uriQuery_;
-    QString version_;
+	State state_;
+	QHostAddress address_;
+	QString method_;
+	QUrl uri_;
+	QUrlQuery uriQuery_;
+	QString version_;
 
-    std::unordered_map<QString, QString, QStringCaseInsensitiveHash, QStringCaseInSensitiveEqual> headers;
-    // Note: Cookies ARE case sensitive, headers are not
-    std::unordered_map<QString, QString> cookies;
+	std::unordered_map<QString, QString, QStringCaseInsensitiveHash, QStringCaseInSensitiveEqual> headers;
+	// Note: Cookies ARE case sensitive, headers are not
+	std::unordered_map<QString, QString> cookies;
 
-    int expectedBodySize;
-    QByteArray body_;
+	int expectedBodySize;
+	QByteArray body_;
 
-    QString mimeType_;
-    QString charset_;
-    QString boundary;
+	QString mimeType_;
+	QString charset_;
+	QString boundary;
 
-    TemporaryFormData *tmpFormData;
+	TemporaryFormData *tmpFormData;
 
-    std::unordered_map<QString, QString> formFields_;
-    std::unordered_map<QString, FormFile> formFiles_;
+	std::unordered_map<QString, QString> formFields_;
+	std::unordered_map<QString, FormFile> formFiles_;
 
-    bool parseRequestLine(QTcpSocket *socket, HttpResponse *response);
-    bool parseHeader(QTcpSocket *socket, HttpResponse *response);
-    bool parseBody(QTcpSocket *socket, HttpResponse *response);
-    bool parseMultiFormBody(QTcpSocket *socket, HttpResponse *response);
+	bool parseRequestLine(QTcpSocket *socket, HttpResponse *response);
+	bool parseHeader(QTcpSocket *socket, HttpResponse *response);
+	bool parseBody(QTcpSocket *socket, HttpResponse *response);
+	bool parseMultiFormBody(QTcpSocket *socket, HttpResponse *response);
 
-    void parseContentType();
-    void parsePostFormBody();
+	void parseContentType();
+	void parsePostFormBody();
 
 public:
-    HttpRequest(HttpServerConfig *config);
-    ~HttpRequest();
+	HttpRequest(HttpServerConfig *config);
+	~HttpRequest();
 
-    bool parseRequest(QTcpSocket *socket, HttpResponse *response);
+	bool parseRequest(QTcpSocket *socket, HttpResponse *response);
 
-    QString parseBodyStr() const;
-    QJsonDocument parseJsonBody() const;
+	QString parseBodyStr() const;
+	QJsonDocument parseJsonBody() const;
 
-    State state() const;
-    QHostAddress address() const;
-    QString method() const;
-    QUrl uri() const;
-    QString uriStr() const;
-    QUrlQuery uriQuery() const;
-    QString version() const;
+	State state() const;
+	QHostAddress address() const;
+	QString method() const;
+	QUrl uri() const;
+	QString uriStr() const;
+	QUrlQuery uriQuery() const;
+	QString version() const;
 
-    bool hasParameter(QString name) const;
-    QString parameter(QString name) const;
-    bool hasFragment() const;
-    QString fragment() const;
+	bool hasParameter(QString name) const;
+	QString parameter(QString name) const;
+	bool hasFragment() const;
+	QString fragment() const;
 
-    template <class T>
-    T headerDefault(QString key, T defaultValue, bool *ok = nullptr) const;
-	
+	template <class T>
+	T headerDefault(QString key, T defaultValue, bool *ok = nullptr) const;
+
 	QString headerDefault(QString key, const char *defaultValue, bool *ok = nullptr) const;
 
-    template <class T>
-    bool header(QString key, T *value) const;
+	template <class T>
+	bool header(QString key, T *value) const;
 
-    QString mimeType() const;
-    QString charset() const;
-    // Note: This function is useful if you want to override the given charset (or say if you know that the request doesn't contain a charset)
-    void setCharset(QString charset);
+	QString mimeType() const;
+	QString charset() const;
+	// Note: This function is useful if you want to override the given charset (or say if you know that the request doesn't contain a charset)
+	void setCharset(QString charset);
 
-    std::unordered_map<QString, QString> formFields() const;
-    std::unordered_map<QString, FormFile> formFiles() const;
-    QString formFile(QString key) const;
-    FormFile formField(QString key) const;
+	std::unordered_map<QString, QString> formFields() const;
+	std::unordered_map<QString, FormFile> formFiles() const;
+	QString formField(QString key) const;
+	FormFile formFile(QString key) const;
 
-    QByteArray body() const;
-    QString cookie(QString name) const;
+	QByteArray body() const;
+	QString cookie(QString name) const;
 };
 
 // Declarations for templates
