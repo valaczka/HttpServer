@@ -40,7 +40,7 @@ HttpEventStream::HttpEventStream(HttpConnection *httpConnection)
 	Q_ASSERT(m_socket);
 
 	connect(&m_pingTimer, &QTimer::timeout, this, &HttpEventStream::ping);
-	m_pingTimer.start(2*60*1000);
+	m_pingTimer.start(30*1000);
 }
 
 
